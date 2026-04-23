@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E8 Steels Pipes — Seamless Pipe Specialists</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Rajdhani',sans-serif;color:#E2E8F0;}
+
+/* ══ CURSOR ══ */
+#cur{position:fixed;width:20px;height:20px;border:1.5px solid rgba(232,117,26,.9);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;}
+#cur.big{width:58px;height:58px;background:rgba(232,117,26,.05);border-color:#E8751A;}
+#curdot{position:fixed;width:4px;height:4px;background:#E8751A;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+
+/* ══ FLASH ══ */
+#flash{position:fixed;inset:0;background:transparent;opacity:0;pointer-events:none;z-index:500;}
+
+/* ══════════════════════════════════
+   LANDING PAGE
+══════════════════════════════════ */
+#landing{position:fixed;inset:0;z-index:40;overflow:hidden;cursor:pointer;background:#000;}
+#landing-video{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;background:#000;
+}
+#lvign{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,transparent 20%,rgba(0,0,0,.4) 100%);pointer-events:none;}
+
+#click-prompt{
+  position:absolute;bottom:8%;left:50%;transform:translateX(-50%);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(14px,2vw,22px);
+  letter-spacing:.38em;
+  color:#E8751A;
+  text-shadow:0 0 18px rgba(232,117,26,.8),0 0 40px rgba(232,117,26,.3);
+  pointer-events:none;z-index:18;
+  animation:gp 2.4s ease-in-out infinite;
+  transition:opacity .4s;
+}
+#landing.playing #click-prompt{opacity:0;}
+@keyframes gp{0%,100%{opacity:.45;}50%{opacity:1;}}
+
+/* ══════════════════════════════════
+   SHOWROOM  
+   Architecture: 3D room is purely decorative.
+   Clickable door zones are fixed overlays — z-index 50 — 
+   completely separate from the parallax so they ALWAYS work.
+══════════════════════════════════ */
+#showroom{position:fixed;inset:0;z-index:20;display:none;}
+
+/* ── 3D ROOM (decorative only, pointer-events:none) ── */
+#scene{
+  position:absolute;inset:-7%;width:114%;height:114%;
+  perspective:700px;perspective-origin:50% 46%;
+  pointer-events:none;
+}
+#room{position:relative;width:100%;height:100%;transform-style:preserve-3d;will-change:transform;}
+
+/* Center wall — full image */
+#bgc{position:absolute;inset:0;background-image:url('Interior_LandingPage_1.png');background-size:cover;background-position:center;background-repeat:no-repeat;}
+/* Side walls — angled, purely visual */
+
+
+#bgfloor{
+  position:absolute;bottom:0;left:-5%;right:-5%;height:42%;
+  background-size:cover;background-position:center bottom;
+  transform-origin:bottom center;
+  transform:rotateX(54deg) scaleY(.5) translateY(14%);
+  filter:brightness(.18) blur(3px);opacity:.6;
+}
+
+/* Vignette over room */
+#rvign{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.68) 100%);
+}
+
+/* ── DOOR CLICK ZONES — fixed, high z-index, ABOVE all 3D ── */
+/* These are positioned as percentage of viewport 
+   matching where the 4 doors appear in the interior image.
+   Image analysis (1400×932):
+     About Us:    x 0-21%,   sign top ~28%, door bottom ~86%
+     Products:    x 21-48%,  same vertical
+     Shipping:    x 48-73%,  same vertical
+     Contact Us:  x 73-100%, same vertical
+*/
+.dzone{
+  position:fixed;
+  top:28%;height:58%;
+  z-index:50;
+  cursor:pointer;
+}
+#dz-about   {left:0;   width:20%;}
+#dz-products{left:21%; width:27%;}
+#dz-shipping{left:49%; width:24%;}
+#dz-contact {left:74%; width:26%;}
+
+.dzone:hover .dhover{opacity:1;}
+.dhover{
+  position:absolute;inset:0;
+  border:2px solid rgba(232,117,26,.55);
+  box-shadow:inset 0 0 40px rgba(232,117,26,.06), 0 0 25px rgba(232,117,26,.1);
+  opacity:0;transition:opacity .22s;pointer-events:none;
+}
+/* spark canvas — top portion = glass window area */
+.sparkc{
+  position:absolute;top:-2%;left:-8%;
+  width:116%;height:52%;
+  pointer-events:none;
+}
+/* click label shown on hover */
+.dlabel{
+  position:absolute;bottom:6%;left:50%;transform:translateX(-50%);
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(10px,1.3vw,16px);
+  letter-spacing:.25em;white-space:nowrap;
+  color:rgba(232,117,26,0);text-shadow:none;
+  transition:color .22s,text-shadow .22s;pointer-events:none;
+}
+.dzone:hover .dlabel{
+  color:#E8751A;
+  text-shadow:0 0 18px rgba(232,117,26,.8),0 0 40px rgba(232,117,26,.3);
+}
+
+/* ── SOUND TOGGLE ── */
+#soundtog{
+  position:fixed;bottom:26px;right:26px;z-index:55;
+  display:none;align-items:center;gap:9px;
+  background:rgba(0,0,0,.7);border:1px solid rgba(232,117,26,.3);
+  padding:8px 16px;cursor:pointer;user-select:none;
+  font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:.22em;color:#E8751A;
+  transition:border-color .2s;
+}
+#soundtog:hover{border-color:#E8751A;}
+
+/* hint */
+#hint{
+  position:fixed;bottom:26px;left:50%;transform:translateX(-50%);
+  font-size:9px;letter-spacing:.28em;color:rgba(255,255,255,.22);
+  text-transform:uppercase;z-index:55;pointer-events:none;
+  display:none;animation:hp 2.8s ease-in-out infinite;
+}
+@keyframes hp{0%,100%{opacity:.3;}50%{opacity:.8;}}
+
+/* ══════════════════════════════════
+   PANEL
+══════════════════════════════════ */
+#panel{
+  position:fixed;inset:0;z-index:200;background:rgba(4,2,2,.97);
+  display:none;flex-direction:column;
+}
+#panel.open{display:flex;animation:pin .35s ease forwards;}
+@keyframes pin{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.phead{padding:24px 36px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.pback{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:10px;letter-spacing:.28em;color:#E8751A;text-transform:uppercase;white-space:nowrap;transition:opacity .2s;}
+.pback:hover{opacity:.55;}
+.ptitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,4.5vw,52px);letter-spacing:.2em;background:linear-gradient(180deg,#FFF 0%,#777 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.pbody{padding:32px 36px;overflow-y:auto;flex:1;}
+
+/* Products grid */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:15px;}
+.pc{border:1px solid rgba(255,255,255,.06);background:#111;padding:22px;position:relative;transition:border-color .3s,transform .3s;overflow:hidden;}
+.pc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#E8751A;transform:scaleX(0);transition:transform .3s;transform-origin:left;}
+.pc:hover{border-color:rgba(232,117,26,.45);transform:translateY(-4px);}
+.pc:hover::after{transform:scaleX(1);}
+.pname{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.12em;margin-bottom:6px;}
+.pspec{font-size:11px;color:#8A9AB5;line-height:1.8;}
+.pbadge{display:inline-block;margin-top:8px;padding:2px 9px;border:1px solid rgba(232,117,26,.35);font-size:8px;letter-spacing:.2em;color:#E8751A;text-transform:uppercase;}
+
+/* About */
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:880px;}
+.ablock{border-left:2px solid #E8751A;padding-left:18px;margin-bottom:22px;}
+.atitle{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.15em;margin-bottom:6px;}
+.abody{font-size:13px;color:#8A9AB5;line-height:1.75;}
+
+/* Contact */
+.cgrid{display:grid;grid-template-columns:1fr 1.2fr;gap:40px;}
+.cinfo h3{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.15em;color:#E8751A;margin-bottom:18px;}
+.cdet{margin-bottom:13px;}
+.cdetl{font-size:9px;letter-spacing:.28em;color:#8A9AB5;text-transform:uppercase;margin-bottom:2px;}
+.cdetv{font-size:14px;font-weight:600;}
+.cform input,.cform textarea,.cform select{
+  width:100%;background:#0F0F0F;border:1px solid rgba(255,255,255,.07);
+  color:#E2E8F0;padding:10px 13px;font-family:'Rajdhani',sans-serif;font-size:13px;
+  margin-bottom:11px;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;
+}
+.cform input:focus,.cform textarea:focus,.cform select:focus{border-color:#E8751A;}
+.cform textarea{height:95px;resize:vertical;}
+.flbl{font-size:9px;letter-spacing:.26em;color:#8A9AB5;text-transform:uppercase;margin-bottom:4px;display:block;}
+.sbtn{background:#E8751A;color:#000;border:none;padding:11px 26px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.22em;cursor:pointer;transition:background .2s,transform .2s;}
+.sbtn:hover{background:#FF8C2A;transform:translateY(-2px);}
+
+/* Shipping */
+.mapbox{position:relative;width:100%;max-width:800px;padding-top:44%;background:#0D0B0A;border:1px solid rgba(255,255,255,.055);overflow:hidden;margin-bottom:18px;}
+.mapbox svg{position:absolute;inset:0;width:100%;height:100%;}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.rcard{border:1px solid rgba(255,255,255,.055);padding:15px;background:#111;}
+.rfrom{font-size:9px;letter-spacing:.28em;color:#8A9AB5;text-transform:uppercase;margin-bottom:4px;}
+.rname{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.12em;}
+.rdet{font-size:11px;color:#8A9AB5;margin-top:5px;line-height:1.6;}
+
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:#0A0A0A;}
+::-webkit-scrollbar-thumb{background:#333;}
+@media(max-width:640px){
+  .cgrid,.agrid{grid-template-columns:1fr;}
+  .rgrid{grid-template-columns:1fr;}
+  .pbody{padding:18px;}
+  .dzone{top:30%;height:54%;}
+}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="curdot"></div>
+<div id="flash"></div>
+
+<!-- ══════════ LANDING ══════════ -->
+<section id="landing" onclick="doEnter()">
+  <video id="landing-video" playsinline preload="auto" muted poster="">
+    <source src="Landing%20page%20with%20sounds.MP4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <div id="lvign"></div>
+  <div id="click-prompt">CLICK ANYWHERE TO ENTER</div>
+</section>
+
+<!-- ══════════ SHOWROOM ══════════ -->
+<section id="showroom">
+
+  <!-- 3D decorative room — pointer-events:none -->
+  <div id="scene">
+    <div id="room">
+      <div id="bgfloor"></div>
+      <div id="bgc"></div>
+      <div id="rvign"></div>
+    </div>
+  </div>
+
+  <!-- DOOR ZONES — fixed, always on top, always clickable -->
+  <div class="dzone" id="dz-about" onclick="openPanel('about')">
+    <canvas class="sparkc" id="sc-about"></canvas>
+    <div class="dhover"></div>
+    <div class="dlabel">About Us</div>
+  </div>
+
+  <div class="dzone" id="dz-products" onclick="openPanel('products')">
+    <canvas class="sparkc" id="sc-products"></canvas>
+    <div class="dhover"></div>
+    <div class="dlabel">Products &amp; Pricing</div>
+  </div>
+
+  <div class="dzone" id="dz-shipping" onclick="openPanel('shipping')">
+    <canvas class="sparkc" id="sc-shipping"></canvas>
+    <div class="dhover"></div>
+    <div class="dlabel">Shipping &amp; Delivery</div>
+  </div>
+
+  <div class="dzone" id="dz-contact" onclick="openPanel('contact')">
+    <canvas class="sparkc" id="sc-contact"></canvas>
+    <div class="dhover"></div>
+    <div class="dlabel">Contact Us</div>
+  </div>
+
+  <!-- Controls -->
+  <div id="soundtog" onclick="toggleSound()">
+    <svg id="sico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8751A" stroke-width="2">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/>
+    </svg>
+    <span id="slbl">SOUND ON</span>
+  </div>
+  <div id="hint">Hover a sign · Click to enter</div>
+
+</section>
+
+<!-- ══════════ PANEL ══════════ -->
+<div id="panel">
+  <div class="phead">
+    <div class="pback" onclick="closePanel()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Showroom
+    </div>
+    <div class="ptitle" id="ptitle">—</div>
+  </div>
+  <div class="pbody" id="pbody"></div>
+</div>
+
+<script>
+/* ══ IMAGES ══ */
+function doEnter(){
+  if(entered) return; entered=true;
+
+  playDoorSound();
+  triggerEntrySparks();
+
+  const tl=gsap.timeline();
+
+  // Camera zoom into the door
+  tl.to('#lbg',{scale:1.09,duration:1.1,ease:'power2.out'});
+
+  // Doors swing open + ENTER text splits apart
+  tl.to('#left-door',  {x:'-110%',duration:1.6,ease:'power4.inOut'},'-=0.35');
+  tl.to('#right-door', {x:'110%', duration:1.6,ease:'power4.inOut'},'<');
+  tl.to('.enter-left', {x:-180,opacity:0,duration:1.3,ease:'power2.out'},'<');
+  tl.to('.enter-right',{x:180, opacity:0,duration:1.3,ease:'power2.out'},'<');
+
+  // Flash white then swap to showroom
+  tl.to('#flash',{opacity:1,duration:0.28},'-=0.25');
+  tl.to('#landing',{opacity:0,duration:0.4,onComplete:()=>{
+    document.getElementById('landing').style.display='none';
+    document.getElementById('showroom').style.display='block';
+    document.getElementById('soundtog').style.display='flex';
+    document.getElementById('hint').style.display='block';
+    gsap.to('#flash',{opacity:0,duration:0.55});
+    initSparks();
+    startSound();
+  }});
+}
+
+/* ══ 3D PARALLAX (decorative room only) ══ */
+let tx=0,ty=0,rtx=0,rty=0;
+const room=document.getElementById('room');
+document.addEventListener('mousemove', e=>{
+  if(!entered) return;
+  tx=(e.clientX/innerWidth-.5)*15;
+  ty=(e.clientY/innerHeight-.5)*8;
+});
+(function ar(){ rtx+=(tx-rtx)*.05; rty+=(ty-rty)*.05; room.style.transform=`rotateY(${-rtx}deg) rotateX(${rty}deg)`; requestAnimationFrame(ar); })();
+
+/* ══ SPARKS ══ */
+class Sparks{
+  constructor(canvas){ this.c=canvas; this.ctx=canvas.getContext('2d'); this.p=[]; this.on=false; this.ambient=true; }
+  spawn(n){
+    const W=this.c.width, H=this.c.height;
+    for(let i=0;i<n;i++){
+      const x=W*(.15+Math.random()*.7), y=H*(.5+Math.random()*.3);
+      const a=-Math.PI/2+(Math.random()-.5)*Math.PI*.85, sp=Math.random()*3.8+1.1;
+      this.p.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,dec:Math.random()*.034+.017,sz:Math.random()*2+.5,hue:Math.random()*35+12,tr:[]});
+    }
+  }
+  draw(){
+    const {c,ctx,p}=this; ctx.clearRect(0,0,c.width,c.height);
+    for(let i=p.length-1;i>=0;i--){
+      const q=p[i]; q.tr.push({x:q.x,y:q.y,a:q.life}); if(q.tr.length>6) q.tr.shift();
+      for(let t=1;t<q.tr.length;t++){
+        ctx.beginPath(); ctx.strokeStyle=`hsla(${q.hue},100%,60%,${q.tr[t].a*.2})`; ctx.lineWidth=q.sz*.5;
+        ctx.moveTo(q.tr[t-1].x,q.tr[t-1].y); ctx.lineTo(q.tr[t].x,q.tr[t-1].y); ctx.lineTo(q.tr[t].x,q.tr[t].y); ctx.stroke();
+      }
+      const g=ctx.createRadialGradient(q.x,q.y,0,q.x,q.y,q.sz*2.6);
+      g.addColorStop(0,`hsla(55,100%,96%,${q.life})`);
+      g.addColorStop(.4,`hsla(${q.hue},100%,62%,${q.life*.8})`);
+      g.addColorStop(1,`hsla(${q.hue},90%,38%,0)`);
+      ctx.beginPath(); ctx.fillStyle=g; ctx.arc(q.x,q.y,q.sz*2.6,0,Math.PI*2); ctx.fill();
+      q.x+=q.vx; q.y+=q.vy; q.vy+=.09; q.vx*=.97; q.life-=q.dec; if(q.life<=0) p.splice(i,1);
+    }
+  }
+  tick(){
+    if(!this.on) return;
+    const rate = this.ambient ? .14 : .58;
+    const count = this.ambient ? 2 : 4;
+    if(Math.random()<rate) this.spawn(Math.floor(Math.random()*count)+1);
+    this.draw(); requestAnimationFrame(()=>this.tick());
+  }
+  start(){ if(this.on) return; this.on=true; this.tick(); }
+  stop(){ this.on=false; this.ctx.clearRect(0,0,this.c.width,this.c.height); }
+}
+
+const sparks={};
+function initSparks(){
+  document.querySelectorAll('.dzone').forEach(dz=>{
+    const id=dz.id.replace('dz-','');
+    const c=document.getElementById('sc-'+id);
+    const resize=()=>{ c.width=dz.offsetWidth*1.16; c.height=dz.offsetHeight*.52; };
+    resize(); window.addEventListener('resize',resize);
+    const s=new Sparks(c); sparks[id]=s; s.start();
+    dz.addEventListener('mouseenter',()=>{ s.ambient=false; });
+    dz.addEventListener('mouseleave',()=>{ s.ambient=true; });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   FACTORY AMBIENT SOUND
+   Plays the real recorded Factory_Sounds.mp3 on loop.
+══════════════════════════════════════════════ */
+let soundOn = false;
+const factoryAudio = new Audio('Factory_Sounds.mp3');
+factoryAudio.loop = true;
+factoryAudio.volume = 0.45;
+factoryAudio.preload = 'auto';
+
+function startSound(){
+  // Browser autoplay policies allow playback now because doEnter()
+  // was triggered by a user click.
+  const p = factoryAudio.play();
+  if(p && typeof p.catch === 'function'){
+    p.then(()=>{ soundOn = true; updateSoundUI(); })
+     .catch(()=>{ soundOn = false; updateSoundUI(); });
+  } else {
+    soundOn = true; updateSoundUI();
+  }
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+  if(soundOn){
+    const p = factoryAudio.play();
+    if(p && typeof p.catch === 'function') p.catch(()=>{});
+  } else {
+    factoryAudio.pause();
+  }
+  updateSoundUI();
+}
+
+function updateSoundUI(){
+  document.getElementById('slbl').textContent = soundOn ? 'SOUND ON' : 'SOUND OFF';
+  const svg = document.getElementById('sico');
+  const NS = 'http://www.w3.org/2000/svg';
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const poly = document.createElementNS(NS,'polygon');
+  poly.setAttribute('points','11 5 6 9 2 9 2 15 6 15 11 19 11 5');
+  svg.appendChild(poly);
+  if(soundOn){
+    const p = document.createElementNS(NS,'path');
+    p.setAttribute('d','M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07');
+    svg.appendChild(p);
+  } else {
+    const l1 = document.createElementNS(NS,'line');
+    l1.setAttribute('x1','23'); l1.setAttribute('y1','9');
+    l1.setAttribute('x2','17'); l1.setAttribute('y2','15');
+    const l2 = document.createElementNS(NS,'line');
+    l2.setAttribute('x1','17'); l2.setAttribute('y1','9');
+    l2.setAttribute('x2','23'); l2.setAttribute('y2','15');
+    svg.appendChild(l1); svg.appendChild(l2);
+  }
+}
+
+/* ══ PANEL CONTENT ══ */
+const PANELS = {
+  about:{
+    title:'About Us',
+    html:`<div class="agrid">
+      <div>
+        <div class="ablock">
+          <div class="atitle">Who We Are</div>
+          <div class="abody">E8 Steels Pipes is a specialist manufacturer and global exporter of seamless steel pipes, proudly made in India and shipped worldwide. We supply industries demanding the highest standards — oil &amp; gas, power generation, construction, and precision engineering.</div>
+        </div>
+        <div class="ablock">
+          <div class="atitle">Our Manufacturing</div>
+          <div class="abody">Our state-of-the-art facility in India produces seamless pipes across a comprehensive range of grades, sizes, and wall thicknesses. Every pipe is manufactured with precision and fully quality-certified before export.</div>
+        </div>
+        <div class="ablock">
+          <div class="atitle">Office Hours</div>
+          <div class="abody">9 to 5 GMT — Monday to Friday. Our team responds to all enquiries within one business day. We're available for technical consultations, quotations, and order queries.</div>
+        </div>
+      </div>
+      <div>
+        <div class="ablock">
+          <div class="atitle">Global Reach</div>
+          <div class="abody">Container freight deliveries to England (UK) and the United States, with capability to ship to any destination worldwide. All documentation, certifications, and customs clearance handled end-to-end.</div>
+        </div>
+        <div class="ablock">
+          <div class="atitle">Our Standards</div>
+          <div class="abody">All products comply with ASTM, API, BS, EN, and DIN international specifications — meeting the full requirements of buyers in the UK and US markets. Full mill test reports with every order.</div>
+        </div>
+        <div class="ablock">
+          <div class="atitle">Why E8 Steels</div>
+          <div class="abody">Mill-direct pricing — no middlemen. Competitive rates, fast lead times, third-party inspection available, and a track record of reliable container scheduling to both the UK and USA.</div>
+        </div>
+      </div>
+    </div>`
+  },
+  products:{
+    title:'Products & Pricing',
+    html:`<div class="pgrid">
+      <div class="pc"><div class="pname">Carbon Steel Seamless Pipe</div><div class="pspec">Sizes: 1/8″ – 24″ OD<br>Wall: SCH 20 – SCH 160<br>Standard: ASTM A106 / A53<br>Grade: A, B, C</div><div class="pbadge">In Stock</div></div>
+      <div class="pc"><div class="pname">Alloy Steel Seamless Pipe</div><div class="pspec">Sizes: 1/4″ – 16″ OD<br>Grades: P5, P9, P11, P22, P91<br>Standard: ASTM A335<br>High temperature service</div><div class="pbadge">To Order</div></div>
+      <div class="pc"><div class="pname">Stainless Steel Seamless Pipe</div><div class="pspec">Sizes: 1/8″ – 12″ OD<br>Grades: 304, 316, 321, 347<br>Standard: ASTM A312<br>Corrosion resistant</div><div class="pbadge">In Stock</div></div>
+      <div class="pc"><div class="pname">Boiler &amp; Heat Exchanger Tubes</div><div class="pspec">OD: 12.7mm – 88.9mm<br>Standard: ASTM A179 / A192<br>High pressure boiler service<br>Cold drawn precision</div><div class="pbadge">In Stock</div></div>
+      <div class="pc"><div class="pname">API Line Pipe</div><div class="pspec">Sizes: 2″ – 20″ OD<br>Grades: API 5L Gr. B, X42–X65<br>Standard: API 5L PSL1 &amp; PSL2<br>Oil &amp; gas transmission</div><div class="pbadge">To Order</div></div>
+      <div class="pc"><div class="pname">Hydraulic &amp; Instrumentation Tube</div><div class="pspec">OD: 6mm – 50mm<br>Precision cold-drawn<br>Standard: EN 10305-4 / ASTM A519<br>Tight tolerances guaranteed</div><div class="pbadge">In Stock</div></div>
+    </div>
+    <p style="margin-top:22px;font-size:11px;color:#8A9AB5;letter-spacing:.06em;">All pricing is quotation-based. Contact us with grade, size, wall thickness, quantity and destination for a mill-direct competitive price.</p>`
+  },
+  shipping:{
+    title:'Shipping & Delivery',
+    html:`<div style="max-width:800px;">
+      <div class="mapbox">
+        <svg viewBox="0 0 900 396" xmlns="http://www.w3.org/2000/svg">
+          <rect width="900" height="396" fill="#0A0808"/>
+          <line x1="0" y1="198" x2="900" y2="198" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+          <line x1="450" y1="0" x2="450" y2="396" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+          <path d="M92 52 L192 44 L230 70 L246 110 L240 150 L220 170 L184 172 L144 166 L106 142 L86 110Z" fill="#1C1515" stroke="#282020" stroke-width="1"/>
+          <path d="M173 184 L226 179 L248 206 L250 260 L235 300 L205 316 L178 306 L160 274 L156 234 L164 206Z" fill="#1C1515" stroke="#282020" stroke-width="1"/>
+          <path d="M373 54 L416 47 L441 58 L448 77 L441 102 L422 114 L400 110 L381 94 L373 74Z" fill="#1C1515" stroke="#282020" stroke-width="1"/>
+          <path d="M383 120 L426 114 L456 128 L468 162 L466 212 L450 246 L426 266 L400 262 L378 244 L368 206 L370 163Z" fill="#1C1515" stroke="#282020" stroke-width="1"/>
+          <path d="M470 40 L623 34 L683 50 L701 86 L691 136 L660 156 L610 163 L555 157 L510 143 L470 116 L456 80Z" fill="#1C1515" stroke="#282020" stroke-width="1"/>
+          <path d="M555 143 L596 134 L620 151 L632 186 L620 224 L596 241 L572 234 L552 206 L545 174Z" fill="#221A18" stroke="#282020" stroke-width="1"/>
+          <path d="M660 233 L730 224 L771 242 L779 280 L756 310 L720 323 L688 313 L668 290 L655 260Z" fill="#1C1515" stroke="#282020" stroke-width="1"/>
+          <circle cx="388" cy="76" r="6" fill="#E8751A"/><circle cx="388" cy="76" r="12" fill="none" stroke="#E8751A" stroke-width="1" opacity="0.4"/>
+          <circle cx="590" cy="183" r="6" fill="#E8751A"/><circle cx="590" cy="183" r="12" fill="none" stroke="#E8751A" stroke-width="1" opacity="0.4"/>
+          <circle cx="174" cy="124" r="6" fill="#E8751A"/><circle cx="174" cy="124" r="12" fill="none" stroke="#E8751A" stroke-width="1" opacity="0.4"/>
+          <path d="M590 183 Q508 94 388 76" stroke="#E8751A" stroke-width="1.8" fill="none" stroke-dasharray="7,5" opacity="0.8"><animate attributeName="stroke-dashoffset" from="0" to="-96" dur="2.6s" repeatCount="indefinite"/></path>
+          <path d="M590 183 Q500 273 380 253 Q280 238 174 124" stroke="#E8751A" stroke-width="1.8" fill="none" stroke-dasharray="7,5" opacity="0.8"><animate attributeName="stroke-dashoffset" from="0" to="-96" dur="3.9s" repeatCount="indefinite"/></path>
+          <text x="590" y="212" text-anchor="middle" fill="#E8751A" font-size="11" font-family="Rajdhani,sans-serif" letter-spacing="2" font-weight="700">INDIA</text>
+          <text x="388" y="62" text-anchor="middle" fill="#E8751A" font-size="11" font-family="Rajdhani,sans-serif" letter-spacing="2" font-weight="700">UK</text>
+          <text x="174" y="112" text-anchor="middle" fill="#E8751A" font-size="11" font-family="Rajdhani,sans-serif" letter-spacing="2" font-weight="700">USA</text>
+          <text x="500" y="118" fill="rgba(232,117,26,.7)" font-size="15">🚢</text>
+          <text x="313" y="230" fill="rgba(232,117,26,.7)" font-size="15">🚢</text>
+        </svg>
+      </div>
+      <div class="rgrid">
+        <div class="rcard"><div class="rfrom">Manufacturing Origin</div><div class="rname">India</div><div class="rdet">All pipes manufactured and certified in India. Full mill test reports. Third-party inspection available on request.</div></div>
+        <div class="rcard"><div class="rfrom">Destination · Europe</div><div class="rname">England, UK</div><div class="rdet">Container freight to UK ports. BS &amp; EN documentation provided. Estimated lead time 4–8 weeks.</div></div>
+        <div class="rcard"><div class="rfrom">Destination · Americas</div><div class="rname">United States</div><div class="rdet">East &amp; West Coast delivery. Full ASTM certification. US Customs documentation handled end-to-end.</div></div>
+      </div>
+    </div>`
+  },
+  contact:{
+    title:'Contact Us',
+    html:`<div class="cgrid">
+      <div class="cinfo">
+        <h3>E8 STEELS PIPES</h3>
+        <div class="cdet"><div class="cdetl">Headquarters</div><div class="cdetv">India</div></div>
+        <div class="cdet"><div class="cdetl">UK Office</div><div class="cdetv">England, United Kingdom</div></div>
+        <div class="cdet"><div class="cdetl">US Office</div><div class="cdetv">United States</div></div>
+        <div class="cdet"><div class="cdetl">Office Hours</div><div class="cdetv">9 to 5 GMT · Mon – Fri</div></div>
+        <div class="cdet"><div class="cdetl">Speciality</div><div class="cdetv">Seamless Steel Pipes · Global Export</div></div>
+        <div class="cdet"><div class="cdetl">Certifications</div><div class="cdetv">ASTM · API · BS · EN · DIN</div></div>
+      </div>
+      <form class="cform" onsubmit="event.preventDefault();">
+        <label class="flbl" for="cf-name">Full Name</label>
+        <input id="cf-name" type="text" placeholder="Your name" autocomplete="name">
+        <label class="flbl" for="cf-email">Email Address</label>
+        <input id="cf-email" type="email" placeholder="your@email.com" autocomplete="email">
+        <label class="flbl" for="cf-phone">Phone Number</label>
+        <input id="cf-phone" type="tel" placeholder="+44 or +1 ..." autocomplete="tel">
+        <label class="flbl" for="cf-country">Country</label>
+        <select id="cf-country"><option>United Kingdom</option><option>United States</option><option>India</option><option>Other</option></select>
+        <label class="flbl" for="cf-msg">Your Enquiry</label>
+        <textarea id="cf-msg" placeholder="Pipe grade, size, wall thickness, quantity and delivery destination…"></textarea>
+        <button type="submit" class="sbtn">Send Enquiry →</button>
+      </form>
+    </div>`
+  }
+};
+
+function openPanel(k){
+  const d=PANELS[k];
+  document.getElementById('ptitle').textContent=d.title;
+  document.getElementById('pbody').innerHTML=d.html;
+  document.getElementById('panel').classList.add('open');
+}
+function closePanel(){ document.getElementById('panel').classList.remove('open'); }
+
+/* ══ CURSOR ══ */
+let entered = false;
+document.addEventListener('DOMContentLoaded', ()=>{
+  const cur = document.getElementById('cur');
+  const curdot = document.getElementById('curdot');
+  document.addEventListener('mousemove', e=>{
+    cur.style.left = e.clientX + 'px';
+    cur.style.top = e.clientY + 'px';
+    curdot.style.left = e.clientX + 'px';
+    curdot.style.top = e.clientY + 'px';
+  });
+  document.addEventListener('mousedown', ()=> cur.classList.add('big'));
+  document.addEventListener('mouseup', ()=> cur.classList.remove('big'));
+});
+
+/* ══ DOOR SOUND ══ */
+function playDoorSound(){
+  // Placeholder for door sound effect
+}
+
+/* ══ ENTRY SPARKS ══ */
+function triggerEntrySparks(){
+  // Placeholder for entry sparks
+}
+
+</script>
+</body>
+</html>
